@@ -3,12 +3,14 @@ extern crate select;
 
 use select::predicate::Class;
 
+use crate::price::Price;
+
 /// Representing a product
 pub struct Product {
     /// Product name
     name: String,
     /// Product's lowest price
-    price: String,
+    pub price: Price,
     /// Product's url
     url: String,
 }
@@ -34,7 +36,7 @@ impl Product {
 
         Product {
             name: String::from(details[0].as_str()),
-            price: String::from(details[1].as_str()),
+            price: Product::price_from_string(String::from(details[1].as_str())),
             url: String::from(url),
         }
     }
@@ -42,12 +44,12 @@ impl Product {
     /// Gives a friendly hello!
     ///
     /// Says "Hello, [name]" to the `Product` it is called on.
-    pub fn name(&self) -> &String {
-        &self.name
+    pub fn name(&self) -> String {
+        String::from(&self.name)
     }
 
-    pub fn price(&self) -> &String {
-        &self.price
+    pub fn price(&self) -> String {
+        self.price.printable()
     }
 
     /// Returns the lowest price found
@@ -79,6 +81,59 @@ impl Product {
         let url = &self.url;
         let details = Product::skroutz_prices(String::from(url.as_str()));
         self.name = String::from(details[0].as_str());
-        self.price = String::from(details[1].as_str());
+        self.price = Product::price_from_string(String::from(details[1].as_str()));
+    }
+
+    pub fn get_vector(&mut self) -> Vec<String> {
+        return vec![self.name(), self.price()];
+    }
+
+    fn price_from_string(string: String) -> Price {
+        Price::new(
+            string
+                .replace("€", "")
+                .replace(",", ".")
+                .trim()
+                .parse()
+                .unwrap_or(0_f64),
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn getting_works() {
+        let mut prod = Product {
+            name: String::from("Testing 1"),
+            price: Product::price_from_string(String::from("123")),
+            url: String::from("http://testing.test"),
+        };
+        assert_eq!(prod.price.printable(), "123.00 €");
+        assert_eq!(prod.name, "Testing 1");
+    }
+
+    #[test]
+    fn price_from_string_works() {
+        let string1 = String::from("123 €");
+        let string2 = String::from("123,45 €");
+        let string3 = String::from(" 124,78    €   ");
+        let string4 = String::from("asdf");
+        assert_eq!(Product::price_from_string(string1).printable(), "123.00 €");
+        assert_eq!(Product::price_from_string(string2).printable(), "123.45 €");
+        assert_eq!(Product::price_from_string(string3).printable(), "124.78 €");
+        assert_eq!(Product::price_from_string(string4).printable(), "0.00 €");
+    }
+
+    #[test]
+    fn get_vector_works() {
+        let mut prod = Product {
+            name: String::from("Testing 1"),
+            price: Product::price_from_string(String::from("123")),
+            url: String::from("http://testing.test"),
+        };
+        assert_eq!(prod.get_vector(), vec!["Testing 1", "123.00 €"]);
     }
 }

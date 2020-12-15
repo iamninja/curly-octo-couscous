@@ -12,5 +12,6 @@ select = "*"
 scraper = "*"
 tokio = "*"
 prettytable-rs = "*"
-tui = { version = "0.13" }
-termion = { version = "1.5" }
+# tui = { version = "0.13" }
+tui = { git = "https://github.com/fdehau/tui-rs", branch = "master" }
+termion = { version = "1" }
