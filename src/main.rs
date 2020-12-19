@@ -17,6 +17,7 @@ use tui::{
     widgets::{Block, Borders, Cell, Row, Table, TableState},
     Terminal,
 };
+use toml;
 mod price;
 mod product;
 use crate::product::Product;
@@ -66,7 +67,7 @@ impl<'a> StatefulTable<> {
 
 fn main() -> Result<(), io::Error> {
     let mut product1 = Product::new("https://skroutz.gr/s/21404653/Dell-P2720D.html");
-    let mut product2 = Product::new("https://www.skroutz.gr/s/21443617/Dell-P2720DC-27.html?");
+    let mut product2 = Product::new("https://www.skroutz.gr/s/21443617/Dell-P2720DC-27.html");
     println!("{:#?}", product1.name());
     product1.update_product();
     println!("{:#?}", product1.name());
@@ -88,8 +89,8 @@ fn main() -> Result<(), io::Error> {
     loop {
         let now = Instant::now();
         let msecs = now.duration_since(then).as_millis();
-        if msecs > 3000 {
-            // 3 seconds passed we mayneed to perform something here (update data)
+        if msecs > 30000 {
+            // 30 seconds passed we mayneed to perform something here (update data)
             table.items = vec![
                 product1.get_vector(),
                 product2.get_vector(),
